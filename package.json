@@ -6,7 +6,8 @@
     "type": "git",
     "url": "git://github.com/philtoms/iep-pubsub.git"
   },
-  "main": "index.mjs",
+  "type": "module",
+  "main": "index.js",
   "license": "MIT",
   "scripts": {
     "test": "node --loader esm-fake-loader ./node_modules/.bin/ava --verbose"
@@ -25,7 +26,7 @@
       ]
     },
     "files": [
-      "**/*.test.mjs"
+      "**/*.test.js"
     ]
   },
   "keywords": [

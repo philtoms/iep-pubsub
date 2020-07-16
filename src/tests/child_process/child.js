@@ -1,13 +1,14 @@
-import pubsub from '../pubsub.mjs';
+import pubsub from '../../pubsub.js';
 
-const { publish, subscribe } = pubsub(process);
+const { publish, subscribe, close } = pubsub();
 
 subscribe('channel', (message) => {
   console.log(process.pid, message);
   setTimeout(() => {
-    process.disconnect();
+    close();
   }, 10);
 });
+
 setTimeout(() => {
   publish('channel', `from child ${process.pid}`);
 }, 10);
