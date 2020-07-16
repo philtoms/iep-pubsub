@@ -1,6 +1,8 @@
 # iep-pubsub
 
-A simple pub-sub that defaults to process IPC via `send -> on` semantics
+A simple pub-sub that defaults to process IPC via `send -> on` semantics.
+
+This pubsub can be configured to broadcast a single message to multiple subscribers across process boundaries.
 
 ## Usage (in process)
 
