@@ -172,7 +172,7 @@ const message = await once(channel);
 
 ### Using custom connector types
 
-To create a custom connector type, pass a function into `pubsub`.
+To create a custom connector type, pass a function or a promise that resolves to a function into `pubsub`.
 
 The function will be called by pubsub with any other arguments passed to pubsub passed directly through to the function as an option spread:
 
@@ -180,7 +180,15 @@ The function will be called by pubsub with any other arguments passed to pubsub 
 pubsub(ccFn, opt1, opt2); // => calls ccFn(opt1, opt2)
 ```
 
-The function must return the pubsub connector API. For example a custom connector that uses [socket-io](https://www.npmjs.com/package/socket.io) transport that operates both on the server and in the browser:
+The function must return the minimal pubsub connector API
+
+```javascript
+{
+  id, send, on;
+}
+```
+
+For example a custom connector that uses [socket-io](https://www.npmjs.com/package/socket.io) transport that operates both on the server and in the browser:
 
 ```javascript
 // ./io-connector.js
