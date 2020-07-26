@@ -7,6 +7,10 @@ import {
   asyncMock,
 } from './fakes.js';
 
+test.serial.beforeEach(() => {
+  mock.reset();
+});
+
 test.serial('connector bootstrap', async (t) => {
   const pubsub = await loadPubsub();
   const connector = await loadConnector();
@@ -63,7 +67,6 @@ test.serial('connector close request', async (t) => {
 test.serial('publish -> subscribe', async (t) => {
   const pubsub = await loadPubsub();
 
-  mock.reset();
   pubsub(connector()).subscribe('channel', mock);
 
   await pubsub().publish('channel', 123);
@@ -86,7 +89,6 @@ test.serial('publish -> wait for remote subscriber', async (t) => {
 test.serial('publish as factory', async (t) => {
   const pubsub = await loadPubsub();
 
-  mock.reset();
   const publish = pubsub().publish('channel');
 
   await pubsub(connector()).subscribe('channel', mock);
@@ -100,7 +102,6 @@ test.serial('publish as factory', async (t) => {
 test.serial('subscribe wait for publish', async (t) => {
   const pubsub = await loadPubsub();
 
-  mock.reset();
   const subscriber = pubsub(connector()).subscribe('channel');
   pubsub().publish('channel', 123);
 
@@ -113,7 +114,6 @@ test.serial('publish -> ignore subscribe to self', async (t) => {
 
   const { publish, subscribe } = pubsub();
 
-  mock.reset();
   subscribe('channel', mock);
   publish('channel', 123);
 
@@ -125,7 +125,6 @@ test.serial('unsubscribe', async (t) => {
 
   const { publish } = pubsub();
 
-  mock.reset();
   await pubsub(connector()).subscribe('channel', mock);
   await publish('channel', 123);
 
@@ -140,7 +139,6 @@ test.serial('once', async (t) => {
 
   const { publish } = pubsub();
 
-  mock.reset();
   await pubsub(connector()).once('channel', mock);
   await publish('channel', 123);
   await publish('channel', 123);
@@ -151,7 +149,6 @@ test.serial('once', async (t) => {
 test.serial('broadcast to multiple connectors', async (t) => {
   const pubsub = await loadPubsub();
 
-  mock.reset();
   pubsub(connector()).subscribe('channel', mock);
   pubsub(connector()).subscribe('channel', mock);
 
@@ -160,10 +157,41 @@ test.serial('broadcast to multiple connectors', async (t) => {
   t.is(mock.calls, 2);
 });
 
+test.serial('cross publish subscribe', async (t) => {
+  const pubsub = await loadPubsub();
+
+  const connection1 = connector(1);
+  const connection2 = connector(2);
+
+  pubsub(connection1).subscribe('channel', mock);
+  pubsub(connection2).subscribe('channel', mock);
+
+  await pubsub(connection1).publish('channel', 123);
+  await pubsub(connection2).publish('channel', 123);
+
+  t.is(mock.calls, 2);
+});
+
+test.serial('cross publish once', async (t) => {
+  const pubsub = await loadPubsub();
+
+  const connection1 = connector(1);
+  const connection2 = connector(2);
+
+  pubsub(connection1).once('channel', mock);
+  pubsub(connection2).once('channel', mock);
+
+  await pubsub(connection1).publish('channel', 123);
+  await pubsub(connection1).publish('channel', 123);
+  await pubsub(connection2).publish('channel', 123);
+  await pubsub(connection2).publish('channel', 123);
+
+  t.is(mock.calls, 2);
+});
+
 test.serial('custom connection', async (t) => {
   const pubsub = await loadPubsub();
 
-  mock.reset();
   pubsub(mock);
 
   t.is(mock.calls, 1);
@@ -172,7 +200,6 @@ test.serial('custom connection', async (t) => {
 test.serial('custom connection with passthrough options', async (t) => {
   const pubsub = await loadPubsub();
 
-  mock.reset();
   pubsub(mock, 1, 2, 3);
 
   t.deepEqual(mock.values.pop(), [1, 2, 3]);

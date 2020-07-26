@@ -119,19 +119,16 @@ export default (...options) => {
     unsubscribe: async (channel, subscriber) => {
       const connection = await worker;
       subscribers[channel] = subscribed(channel).filter((entry) => {
-        if (
-          entry.subscriber === subscriber ||
-          entry.sid === subscriber ||
-          !subscriber
-        ) {
-          if (!subscriber || typeof subscriber === 'function') {
-            if (connection !== dispatcher) {
-              connection.send({
-                channel,
-                unsubscribe: true,
-              });
-            }
+        if (entry.subscriber === subscriber || !subscriber) {
+          if (connection !== dispatcher) {
+            connection.send({
+              channel,
+              unsubscribe: true,
+            });
           }
+          return false;
+        }
+        if (!entry.subscriber && entry.sid === subscriber) {
           return false;
         }
         return true;
